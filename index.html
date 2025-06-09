@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Uthkrishtam Fashion - Cutting Stock Manager</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Chart.js CDN (can be removed if no charts are used anywhere) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="logo.png" alt="Uthkrishtam Fashion Logo" class="logo">
+            <h1>Uthkrishtam Fashion - Cutting Stock Manager</h1>
+        </div>
+        <nav>
+            <button class="nav-button" data-page="home">Home</button>
+            <button class="nav-button" data-page="add-cutting">Add Cutting</button>
+            <button class="nav-button" data-page="remove-cutting">Remove Cutting</button>
+        </nav>
+    </header>
+
+    <main>
+        <!-- Home Page -->
+        <section id="home-page" class="page active">
+            <h2>Current Stock Overview</h2>
+            <div class="stock-summary-grid" id="stock-summary-grid">
+                <!-- Stock category cards will be populated here by JavaScript -->
+            </div>
+
+            <div class="summary-total-pieces">
+                Total Pieces Across All Categories: <span id="total-pieces-overall">0</span>
+            </div>
+
+            <div class="stock-alert-section" id="stock-alert-section">
+                <!-- Low/Out of stock alerts will be displayed here -->
+            </div>
+
+            <!-- Chart Section Removed -->
+
+            <div class="stock-table-container">
+                <h2>Detailed Stock View</h2>
+                <div class="filter-controls">
+                    <div class="filter-group">
+                        <label for="filter-type">Filter by Type:</label>
+                        <select id="filter-type">
+                            <option value="all">Show All Types</option>
+                            <option value="AppleCut">AppleCut</option>
+                            <option value="AK Cotton">AK Cotton</option>
+                            <option value="Print">Print</option>
+                            <option value="Sleevless">Sleevless</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-size">Filter by Size:</label>
+                        <select id="filter-size">
+                            <option value="all">Show All Sizes</option>
+                            <option value="S">S</option>
+                            <option value="M">M</option>
+                            <option value="L">L</option>
+                            <option value="XL">XL</option>
+                            <option value="XXL">XXL</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label for="filter-color">Filter by Color:</label>
+                        <select id="filter-color">
+                            <option value="all">Show All Colors</option>
+                        </select>
+                    </div>
+                </div>
+                <table id="current-stock-table">
+                    <thead>
+                        <tr>
+                            <th>Type</th>
+                            <th>Size</th>
+                            <th>Color</th>
+                            <th>Quantity</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Stock data will be populated here by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Add Cutting Page -->
+        <section id="add-cutting-page" class="page">
+            <h2>Add New Cutting Stock</h2>
+            <form id="add-cutting-form">
+                <div class="form-group">
+                    <label for="add-type">Type of Kurti Cutting:</label>
+                    <select id="add-type" required>
+                        <option value="">Select Type</option>
+                        <option value="AppleCut">AppleCut</option>
+                        <option value="AK Cotton">AK Cotton</option>
+                        <option value="Print">Print</option>
+                        <option value="Sleevless">Sleevless</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-size">Size:</label>
+                    <select id="add-size" required>
+                        <option value="">Select Size</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-color">Color:</label>
+                    <select id="add-color" required>
+                        <option value="">Select Color</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-pieces">Total Number of Pieces:</label>
+                    <input type="number" id="add-pieces" min="1" required>
+                </div>
+                <button type="submit">Add Stock</button>
+            </form>
+        </section>
+
+        <!-- Remove Cutting Page -->
+        <section id="remove-cutting-page" class="page">
+            <h2>Remove Cutting Stock (Given to Labour)</h2>
+            <form id="remove-cutting-form">
+                <div class="form-group">
+                    <label for="remove-type">Type of Kurti Cutting:</label>
+                    <select id="remove-type" required>
+                        <option value="">Select Type</option>
+                        <option value="AppleCut">AppleCut</option>
+                        <option value="AK Cotton">AK Cotton</option>
+                        <option value="Print">Print</option>
+                        <option value="Sleevless">Sleevless</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="remove-size">Size:</label>
+                    <select id="remove-size" required>
+                        <option value="">Select Size</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="remove-color">Color:</label>
+                    <select id="remove-color" required>
+                        <option value="">Select Color</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="remove-pieces">Pieces to Remove:</label>
+                    <input type="number" id="remove-pieces" min="1" required>
+                </div>
+                <button type="submit">Remove Stock</button>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Uthkrishtam Fashion. All rights reserved.</p>
+        <p>Created by Harpalsinh Gohil</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>

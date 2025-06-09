@@ -1,0 +1,683 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+    --primary-blue: #007bff; /* A vibrant blue for primary elements */
+    --secondary-blue: #0056b3; /* Darker blue for hover/active states */
+    --light-blue: #e0f2f7; /* Very light blue for subtle backgrounds */
+    --white: #ffffff;
+    --dark-gray: #343a40; /* For text and darker elements */
+    --light-gray: #f8f9fa; /* Background for sections */
+    --border-color: #dee2e6; /* Light border for elements */
+    --shadow-light: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+    --shadow-medium: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+
+    /* Status Colors */
+    --status-low: #ffc107; /* Yellow for low stock */
+    --status-out: #dc3545; /* Red for out of stock */
+    --status-ok: #28a745; /* Green for healthy stock */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    line-height: 1.6;
+    color: var(--dark-gray);
+    background-color: var(--light-gray);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    padding: 1.5rem 2rem;
+    box-shadow: var(--shadow-medium);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    text-align: center;
+}
+
+.logo {
+    height: 70px; /* Adjusted size for better visibility */
+    width: auto;
+    border-radius: 50%; /* Optional: make logo round */
+    box-shadow: var(--shadow-light);
+}
+
+header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+}
+
+nav {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.nav-button {
+    background-color: var(--secondary-blue);
+    color: var(--white);
+    border: none;
+    padding: 12px 25px;
+    border-radius: 8px; /* Rounded corners */
+    cursor: pointer;
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    box-shadow: var(--shadow-light);
+}
+
+.nav-button:hover {
+    background-color: #00428d; /* Even darker blue */
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
+}
+
+.nav-button.active-nav {
+    background-color: var(--white);
+    color: var(--primary-blue);
+    font-weight: 600;
+    box-shadow: var(--shadow-medium);
+    transform: translateY(0); /* Reset transform */
+}
+
+main {
+    flex-grow: 1;
+    padding: 3.5rem; /* Increased padding for more vertical space on larger screens */
+    max-width: 1300px; /* Reverted max-width to 1300px for consistency and smaller cards on very large screens */
+    margin: 30px auto;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+}
+
+.page {
+    display: none;
+    animation: fadeIn 0.6s ease-in-out;
+}
+
+.page.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h2 {
+    color: var(--primary-blue);
+    margin-bottom: 2rem;
+    text-align: center;
+    padding-bottom: 0.8rem;
+    position: relative;
+}
+
+h2::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 3px;
+    background-color: var(--primary-blue);
+    border-radius: 5px;
+}
+
+.stock-summary-grid {
+    display: grid;
+    /* Fixed 4 columns for large screens by default */
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+    margin-bottom: 2.5rem;
+}
+
+.stock-category-card {
+    background-color: var(--light-blue);
+    padding: 1.2rem; /* Decreased padding for smaller cards */
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 130px; /* Decreased min-height for even smaller cards */
+    transition: transform 0.3s ease;
+}
+
+.stock-category-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.stock-category-card h3 {
+    color: var(--secondary-blue);
+    font-size: 1.2rem; /* Slightly reduced font size for smaller cards */
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.stock-category-card p {
+    font-size: 1rem; /* Slightly reduced font size */
+    margin-bottom: 0.4rem;
+}
+
+.stock-category-card .total-pieces {
+    font-size: 2rem; /* Slightly reduced font size */
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-top: 0.4rem;
+    margin-bottom: 0.8rem;
+}
+
+/* Mini Progress Bar for Stock Levels */
+.mini-graph-container {
+    width: 100%;
+    background-color: var(--border-color);
+    border-radius: 5px;
+    height: 12px; /* Slightly reduced height for mini graph */
+    margin-top: 0.8rem;
+    overflow: hidden; /* Ensure fill stays within bounds */
+}
+
+.mini-graph-fill {
+    height: 100%;
+    background-color: var(--primary-blue);
+    border-radius: 5px;
+    width: 0%; /* Will be set by JS */
+    transition: width 0.5s ease-out;
+}
+
+.mini-graph-label {
+    font-size: 0.8em; /* Slightly reduced font size */
+    color: var(--dark-gray);
+    margin-top: 0.4rem;
+    font-weight: 500;
+}
+
+
+.summary-total-pieces {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    margin-bottom: 2.5rem;
+    padding: 1rem;
+    background-color: var(--light-blue);
+    border-radius: 8px;
+    box-shadow: var(--shadow-light);
+}
+
+.summary-total-pieces #total-pieces-overall {
+    color: var(--primary-blue);
+    font-size: 1.8rem;
+}
+
+.stock-alert-section {
+    background-color: #fff3cd; /* Light warning yellow */
+    border: 1px solid #ffeeba;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    display: none; /* Hidden by default, shown by JS */
+    box-shadow: var(--shadow-light);
+}
+
+.stock-alert-section p {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #856404; /* Darker yellow text */
+}
+
+.stock-alert-section ul {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.stock-alert-section ul li {
+    margin-bottom: 0.3rem;
+    padding-left: 1.5rem;
+    position: relative;
+    font-size: 0.95rem;
+}
+
+.stock-alert-section ul li::before {
+    content: '⚠️'; /* Warning emoji */
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.stock-alert-section ul li.low-stock {
+    color: var(--status-low);
+}
+
+.stock-alert-section ul li.out-of-stock {
+    color: var(--status-out);
+}
+
+/* Removed .chart-section and .graph-container as charts are removed */
+/*
+.chart-section {
+    margin-bottom: 2.5rem;
+}
+
+.graph-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    justify-content: center;
+}
+*/
+
+.chart-card { /* Kept if used for other card-like elements, otherwise remove */
+    background-color: var(--white);
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: var(--shadow-light);
+    /* height: 400px; Removed fixed height as it was for charts */
+    display: flex;
+    flex-direction: column;
+}
+
+.chart-card h3 {
+    text-align: center;
+    color: var(--secondary-blue);
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+}
+
+canvas { /* Kept for general canvas styling if needed elsewhere, but chart specific logic removed */
+    flex-grow: 1; /* Allow canvas to fill available space */
+}
+
+/* Forms */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    max-width: 550px;
+    margin: 0 auto;
+    padding: 2.5rem;
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: var(--shadow-medium);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.7rem;
+    font-weight: 600;
+    color: var(--dark-gray);
+    font-size: 1rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group select {
+    padding: 12px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1.05rem;
+    width: 100%;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    outline: none;
+}
+
+form button[type="submit"] {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    padding: 14px 30px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.2rem;
+    font-weight: 600;
+    transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    margin-top: 1.5rem;
+    box-shadow: var(--shadow-light);
+}
+
+form button[type="submit"]:hover {
+    background-color: var(--secondary-blue);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* Table */
+.stock-table-container {
+    margin-top: 3rem;
+    overflow-x: auto; /* For responsive tables */
+}
+
+#current-stock-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    box-shadow: var(--shadow-medium);
+    border-radius: 8px;
+    overflow: hidden; /* Ensures rounded corners apply to children */
+}
+
+#current-stock-table th,
+#current-stock-table td {
+    border: 1px solid var(--border-color);
+    padding: 14px 18px;
+    text-align: left;
+    white-space: nowrap; /* Prevent wrapping in cells */
+}
+
+#current-stock-table th {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.95rem;
+}
+
+#current-stock-table tbody tr:nth-child(even) {
+    background-color: var(--light-gray);
+}
+
+#current-stock-table tbody tr:hover {
+    background-color: #e9ecef;
+}
+
+/* Table Status Highlighting */
+.status-ok {
+    color: var(--status-ok);
+    font-weight: 500;
+}
+
+.status-low {
+    color: var(--status-low);
+    font-weight: 600;
+}
+
+.status-out {
+    color: var(--status-out);
+    font-weight: 700;
+}
+
+/* Filter Controls Styling */
+.filter-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    justify-content: center;
+    align-items: flex-end; /* Align labels and selects nicely */
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px; /* Ensure reasonable width for each filter */
+}
+
+.filter-controls label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--dark-gray);
+}
+
+.filter-controls select {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    background-color: var(--white);
+    box-shadow: var(--shadow-light);
+    cursor: pointer;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-controls select:hover {
+    border-color: var(--primary-blue);
+}
+
+.filter-controls select:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+
+/* Footer */
+footer {
+    background-color: var(--dark-gray);
+    color: var(--white);
+    text-align: center;
+    padding: 2rem;
+    margin-top: auto; /* Pushes footer to the bottom */
+    box-shadow: 0 -2px 5px rgba(0,0,0,0.1);
+    font-size: 0.9rem;
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+}
+
+footer p {
+    margin: 0.5rem 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) { /* New breakpoint for larger laptops, keeping 4 columns */
+    .stock-summary-grid {
+        grid-template-columns: repeat(4, 1fr); /* Maintain 4 columns for larger laptops */
+        gap: 1.5rem;
+    }
+}
+
+@media (max-width: 992px) {
+    header h1 {
+        font-size: 1.8rem;
+    }
+    main {
+        padding: 2rem;
+        margin: 20px auto;
+        max-width: 95%; /* Adjust max-width for smaller laptops */
+    }
+    .stock-summary-grid {
+        /* On screens up to 992px, allow auto-fitting with minimum width of 200px (adjusted) */
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+    }
+    .stock-category-card { /* Adjust height for smaller laptops/tablets */
+        min-height: 110px; /* Further decreased min-height */
+        padding: 0.9rem; /* Adjusted padding */
+    }
+    .stock-category-card h3 {
+        font-size: 1.1rem;
+    }
+    .stock-category-card .total-pieces {
+        font-size: 1.6rem; /* Slightly reduced font size */
+    }
+}
+
+@media (max-width: 768px) { /* Tablet size breakpoint */
+    header {
+        padding: 1rem;
+    }
+
+    .header-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .logo {
+        height: 60px;
+    }
+
+    header h1 {
+        font-size: 1.5rem;
+    }
+
+    nav {
+        flex-direction: row; /* Changed to row for horizontal display */
+        justify-content: center; /* Center buttons horizontally */
+        align-items: center; /* Align items to center */
+        gap: 8px;
+    }
+
+    .nav-button {
+        width: auto; /* Allow buttons to size based on content */
+        padding: 10px 15px;
+    }
+
+    main {
+        padding: 1.5rem;
+        margin: 15px auto;
+        max-width: 98%; /* More fluid width for tablets */
+    }
+
+    h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .stock-summary-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablet screens */
+        gap: 1.5rem;
+    }
+    .stock-category-card { /* Adjust height for tablets */
+        min-height: 90px; /* Further decreased min-height */
+        padding: 0.6rem; /* Adjusted padding */
+    }
+    .stock-category-card h3 {
+        font-size: 0.9rem; /* Further reduced font size */
+    }
+    .stock-category-card p {
+        font-size: 0.75rem; /* Further reduced font size */
+    }
+    .stock-category-card .total-pieces {
+        font-size: 1.2rem; /* Further reduced font size */
+    }
+    .mini-graph-container {
+        height: 10px; /* Reduced height */
+    }
+    .mini-graph-label {
+        font-size: 0.7em; /* Reduced font size */
+    }
+
+    form {
+        padding: 1.5rem;
+        gap: 1rem;
+    }
+
+    form button[type="submit"] {
+        font-size: 1.1rem;
+        padding: 12px 20px;
+    }
+
+    #current-stock-table th,
+    #current-stock-table td {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+    }
+
+    .filter-controls {
+        flex-direction: column; /* Stack filters vertically on smaller tablets */
+        align-items: stretch;
+    }
+    .filter-group {
+        min-width: unset; /* Remove min-width to allow full width */
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    header {
+        padding: 0.8rem;
+    }
+    header h1 {
+        font-size: 1.3rem;
+    }
+    .logo {
+        height: 50px;
+    }
+    main {
+        padding: 1rem;
+        margin: 10px auto;
+        max-width: 100%; /* Full width for very small phones */
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
+    .stock-summary-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 columns for mobile screens */
+        gap: 1rem;
+    }
+    .stock-category-card { /* Adjust height for mobile */
+        min-height: 70px; /* Further decreased min-height for mobile */
+        padding: 0.4rem; /* Adjusted padding */
+    }
+    .stock-category-card h3 {
+        font-size: 0.7rem; /* Further reduced font size */
+        margin-bottom: 0.2rem;
+    }
+    .stock-category-card p {
+        font-size: 0.6rem; /* Further reduced font size */
+        margin-bottom: 0.1rem;
+    }
+    .stock-category-card .total-pieces {
+        font-size: 0.9rem; /* Further reduced font size */
+        margin-top: 0.1rem;
+        margin-bottom: 0.2rem;
+    }
+    .mini-graph-container {
+        height: 6px; /* Further reduced height */
+        margin-top: 0.2rem;
+    }
+    .mini-graph-label {
+        font-size: 0.5em; /* Further reduced font size */
+        margin-top: 0.1rem;
+    }
+    .summary-total-pieces {
+        font-size: 1.2rem;
+    }
+    .summary-total-pieces #total-pieces-overall {
+        font-size: 1.5rem;
+    }
+    .nav-button { /* Adjusted for smaller navigation buttons on mobile */
+        padding: 8px 15px; /* Smaller padding */
+        font-size: 0.9rem; /* Smaller font size */
+    }
+    form {
+        padding: 1rem;
+    }
+    .form-group label {
+        font-size: 0.9rem;
+    }
+    .form-group input, .form-group select {
+        padding: 10px;
+        font-size: 0.95rem;
+    }
+}
