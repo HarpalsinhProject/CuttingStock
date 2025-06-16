@@ -143,8 +143,8 @@ h2::after {
 
 .stock-summary-grid {
     display: grid;
-    /* Fixed 4 columns for large screens by default */
-    grid-template-columns: repeat(4, 1fr);
+    /* Use auto-fit to dynamically adjust columns based on available space */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin-bottom: 2.5rem;
 }
@@ -274,26 +274,11 @@ h2::after {
     color: var(--status-out);
 }
 
-/* Removed .chart-section and .graph-container as charts are removed */
-/*
-.chart-section {
-    margin-bottom: 2.5rem;
-}
-
-.graph-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 2rem;
-    justify-content: center;
-}
-*/
-
 .chart-card { /* Kept if used for other card-like elements, otherwise remove */
     background-color: var(--white);
     padding: 1.5rem;
     border-radius: 12px;
     box-shadow: var(--shadow-light);
-    /* height: 400px; Removed fixed height as it was for charts */
     display: flex;
     flex-direction: column;
 }
@@ -488,10 +473,51 @@ footer p {
     margin: 0.5rem 0;
 }
 
+/* New styles for the Kurti Type, Color, and Size options (boxes) */
+.kurti-type-options-container {
+    display: grid; /* Changed to grid */
+    grid-template-columns: repeat(2, 1fr); /* Explicitly 2 columns */
+    gap: 10px; /* Space between the option boxes */
+    margin-top: 5px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--white);
+    box-shadow: var(--shadow-light);
+}
+
+.kurti-type-option {
+    padding: 10px 15px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: var(--light-gray);
+    color: var(--dark-gray);
+    font-size: 0.95rem;
+    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.1s ease;
+    text-align: center; /* Center the text inside each option box */
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+.kurti-type-option:hover {
+    background-color: #e9ecef;
+    border-color: var(--secondary-blue);
+}
+
+.kurti-type-option.selected {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border-color: var(--primary-blue);
+    font-weight: 600;
+    box-shadow: var(--shadow-light);
+    transform: translateY(-2px);
+}
+
+
 /* Responsive adjustments */
-@media (max-width: 1200px) { /* New breakpoint for larger laptops, keeping 4 columns */
+@media (max-width: 1200px) {
     .stock-summary-grid {
-        grid-template-columns: repeat(4, 1fr); /* Maintain 4 columns for larger laptops */
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
         gap: 1.5rem;
     }
 }
@@ -503,26 +529,28 @@ footer p {
     main {
         padding: 2rem;
         margin: 20px auto;
-        max-width: 95%; /* Adjust max-width for smaller laptops */
+        max-width: 95%;
     }
     .stock-summary-grid {
-        /* On screens up to 992px, allow auto-fitting with minimum width of 200px (adjusted) */
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1.5rem;
     }
-    .stock-category-card { /* Adjust height for smaller laptops/tablets */
-        min-height: 110px; /* Further decreased min-height */
-        padding: 0.9rem; /* Adjusted padding */
+    .stock-category-card {
+        min-height: 110px;
+        padding: 0.9rem;
     }
     .stock-category-card h3 {
         font-size: 1.1rem;
     }
     .stock-category-card .total-pieces {
-        font-size: 1.6rem; /* Slightly reduced font size */
+        font-size: 1.6rem;
+    }
+    .kurti-type-options-container { /* Adjust minmax for type options on medium screens */
+        grid-template-columns: repeat(2, 1fr); /* Explicitly 2 columns */
     }
 }
 
-@media (max-width: 768px) { /* Tablet size breakpoint */
+@media (max-width: 768px) {
     header {
         padding: 1rem;
     }
@@ -541,21 +569,21 @@ footer p {
     }
 
     nav {
-        flex-direction: row; /* Changed to row for horizontal display */
-        justify-content: center; /* Center buttons horizontally */
-        align-items: center; /* Align items to center */
+        flex-direction: row;
+        justify-content: center;
+        align-items: center;
         gap: 8px;
     }
 
     .nav-button {
-        width: auto; /* Allow buttons to size based on content */
+        width: auto;
         padding: 10px 15px;
     }
 
     main {
         padding: 1.5rem;
         margin: 15px auto;
-        max-width: 98%; /* More fluid width for tablets */
+        max-width: 98%;
     }
 
     h2 {
@@ -564,27 +592,27 @@ footer p {
     }
 
     .stock-summary-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns for tablet screens */
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
         gap: 1.5rem;
     }
-    .stock-category-card { /* Adjust height for tablets */
-        min-height: 90px; /* Further decreased min-height */
-        padding: 0.6rem; /* Adjusted padding */
+    .stock-category-card {
+        min-height: 90px;
+        padding: 0.6rem;
     }
     .stock-category-card h3 {
-        font-size: 0.9rem; /* Further reduced font size */
+        font-size: 0.9rem;
     }
     .stock-category-card p {
-        font-size: 0.75rem; /* Further reduced font size */
+        font-size: 0.75rem;
     }
     .stock-category-card .total-pieces {
-        font-size: 1.2rem; /* Further reduced font size */
+        font-size: 1.2rem;
     }
     .mini-graph-container {
-        height: 10px; /* Reduced height */
+        height: 10px;
     }
     .mini-graph-label {
-        font-size: 0.7em; /* Reduced font size */
+        font-size: 0.7em;
     }
 
     form {
@@ -604,12 +632,15 @@ footer p {
     }
 
     .filter-controls {
-        flex-direction: column; /* Stack filters vertically on smaller tablets */
+        flex-direction: column;
         align-items: stretch;
     }
     .filter-group {
-        min-width: unset; /* Remove min-width to allow full width */
+        min-width: unset;
         width: 100%;
+    }
+    .kurti-type-options-container { /* Adjust minmax for type options on tablets */
+        grid-template-columns: repeat(2, 1fr); /* Explicitly 2 columns */
     }
 }
 
@@ -626,38 +657,38 @@ footer p {
     main {
         padding: 1rem;
         margin: 10px auto;
-        max-width: 100%; /* Full width for very small phones */
+        max-width: 100%;
     }
     h2 {
         font-size: 1.5rem;
     }
     .stock-summary-grid {
-        grid-template-columns: repeat(2, 1fr); /* 2 columns for mobile screens */
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
         gap: 1rem;
     }
-    .stock-category-card { /* Adjust height for mobile */
-        min-height: 70px; /* Further decreased min-height for mobile */
-        padding: 0.4rem; /* Adjusted padding */
+    .stock-category-card {
+        min-height: 70px;
+        padding: 0.4rem;
     }
     .stock-category-card h3 {
-        font-size: 0.7rem; /* Further reduced font size */
+        font-size: 0.7rem;
         margin-bottom: 0.2rem;
     }
     .stock-category-card p {
-        font-size: 0.6rem; /* Further reduced font size */
+        font-size: 0.6rem;
         margin-bottom: 0.1rem;
     }
     .stock-category-card .total-pieces {
-        font-size: 0.9rem; /* Further reduced font size */
+        font-size: 0.9rem;
         margin-top: 0.1rem;
         margin-bottom: 0.2rem;
     }
     .mini-graph-container {
-        height: 6px; /* Further reduced height */
+        height: 6px;
         margin-top: 0.2rem;
     }
     .mini-graph-label {
-        font-size: 0.5em; /* Further reduced font size */
+        font-size: 0.5em;
         margin-top: 0.1rem;
     }
     .summary-total-pieces {
@@ -666,9 +697,9 @@ footer p {
     .summary-total-pieces #total-pieces-overall {
         font-size: 1.5rem;
     }
-    .nav-button { /* Adjusted for smaller navigation buttons on mobile */
-        padding: 8px 15px; /* Smaller padding */
-        font-size: 0.9rem; /* Smaller font size */
+    .nav-button {
+        padding: 8px 15px;
+        font-size: 0.9rem;
     }
     form {
         padding: 1rem;
@@ -679,5 +710,8 @@ footer p {
     .form-group input, .form-group select {
         padding: 10px;
         font-size: 0.95rem;
+    }
+    .kurti-type-options-container {
+        grid-template-columns: 1fr; /* On very small screens, force single column */
     }
 }
