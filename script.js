@@ -1,19 +1,16 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- Stock Data and Configuration ---
     const stockDataKey = 'uthkrishtamFashionStock';
-    const transactionLogKey = 'uthkrishtamFashionTransactions'; // For graph data
-    const LOW_STOCK_THRESHOLD = 10; // Define the threshold for low stock
+    const LOW_STOCK_THRESHOLD = 2; // Define the threshold for low stock in BUNDLES
 
     // Define colors for each Kurti Type
     const kurtiColors = {
         'AppleCut': ['Black', 'White', 'Yellow', 'Rama', 'Pink', 'Blue', 'Cream', 'Orange'],
         'AK Cotton': ['Pink', 'Maroon', 'Black', 'White', 'Green'],
-        'Print': ['Multicolor'],
-        'Sleevless': ['Black', 'White', 'Yellow', 'Rama', 'Pink', 'Blue', 'Cream', 'Orange']
     };
 
-    // Define Kurti Types for dynamic card generation and filters
-    const kurtiTypes = ['AppleCut', 'AK Cotton', 'Print', 'Sleevless'];
+    // Define Kurti Types for dynamic card generation and forms
+    const kurtiTypes = ['AppleCut', 'AK Cotton'];
     // Define Sizes for dynamic filter population
     const kurtiSizes = ['S', 'M', 'L', 'XL', 'XXL'];
 
@@ -26,9 +23,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalPiecesOverallSpan = document.getElementById('total-pieces-overall');
     const stockAlertSection = document.getElementById('stock-alert-section');
     const currentStockTableBody = document.querySelector('#current-stock-table tbody');
-    // Removed chart instances as charts are no longer present
-    // let piecesAddedChartInstance;
-    // let piecesRemovedChartInstance;
 
     // Filter Elements for Detailed Stock View
     const filterTypeSelect = document.getElementById('filter-type');
@@ -38,15 +32,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add Cutting Form Elements
     const addCuttingForm = document.getElementById('add-cutting-form');
-    const addTypeSelect = document.getElementById('add-type');
-    const addColorSelect = document.getElementById('add-color');
-    const addPiecesInput = document.getElementById('add-pieces');
+    const addTypeOptionsContainer = document.getElementById('add-type-options');
+    const addTypeInput = document.getElementById('add-type');
+    const addColorOptionsContainer = document.getElementById('add-color-options');
+    const addColorInput = document.getElementById('add-color-input');
+    const addSizesOptionsContainer = document.getElementById('add-size-options');
+    const addSizesInput = document.getElementById('add-size-input');
+    const addBundlesInput = document.getElementById('add-pieces');
 
     // Remove Cutting Form Elements
     const removeCuttingForm = document.getElementById('remove-cutting-form');
-    const removeTypeSelect = document.getElementById('remove-type');
-    const removeColorSelect = document.getElementById('remove-color');
-    const removePiecesInput = document.getElementById('remove-pieces');
+    const removeTypeOptionsContainer = document.getElementById('remove-type-options');
+    const removeTypeInput = document.getElementById('remove-type');
+    const removeColorOptionsContainer = document.getElementById('remove-color-options');
+    const removeColorInput = document.getElementById('remove-color-input');
+    const removeSizesOptionsContainer = document.getElementById('remove-size-options');
+    const removeSizesInput = document.getElementById('remove-size-input');
+    const removeBundlesInput = document.getElementById('remove-pieces');
+
 
     // --- Initial Load & Data Management ---
 
@@ -64,22 +67,6 @@ document.addEventListener('DOMContentLoaded', () => {
      */
     function setStockData(data) {
         localStorage.setItem(stockDataKey, JSON.stringify(data));
-    }
-
-    /**
-     * Retrieves transaction log data from localStorage.
-     * @returns {Object} The transaction log object with 'added' and 'removed' arrays.
-     */
-    function getTransactionLog() {
-        return JSON.parse(localStorage.getItem(transactionLogKey)) || { added: [], removed: [] };
-    }
-
-    /**
-     * Saves transaction log data to localStorage.
-     * @param {Object} log - The transaction log object to save.
-     */
-    function setTransactionLog(log) {
-        localStorage.setItem(transactionLogKey, JSON.stringify(log));
     }
 
     // --- Navigation Logic ---
@@ -102,16 +89,32 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Update home page content when home page is activated (charts no longer relevant)
+        // Update content based on active page
         if (pageId === 'home-page') {
             updateHomePage();
+        }
+
+        // For other pages, ensure forms are reset and options are rendered
+        if (pageId === 'add-cutting-page') {
+            addCuttingForm.reset();
+            renderKurtiTypeOptions(addTypeOptionsContainer, addTypeInput,
+                                addColorOptionsContainer, addColorInput,
+                                addSizesOptionsContainer, addSizesInput,
+                                kurtiTypes, kurtiColors, kurtiSizes);
+        }
+        if (pageId === 'remove-cutting-page') {
+            removeCuttingForm.reset();
+            renderKurtiTypeOptions(removeTypeOptionsContainer, removeTypeInput,
+                                removeColorOptionsContainer, removeColorInput,
+                                removeSizesOptionsContainer, removeSizesInput,
+                                kurtiTypes, kurtiColors, kurtiSizes);
         }
     }
 
     // Attach event listeners to navigation buttons
     navButtons.forEach(button => {
         button.addEventListener('click', () => {
-            const pageId = `${button.dataset.page}-page`; // Construct page ID from data-page attribute
+            const pageId = `${button.dataset.page}-page`;
             showPage(pageId);
         });
     });
@@ -119,15 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Home Page Updates ---
     /**
      * Updates all dynamic content on the home page, including stock cards,
-     * total pieces, low stock alerts, and charts.
+     * total bundles, low stock alerts.
      */
     function updateHomePage() {
         const stock = getStockData();
-        let overallTotalPieces = 0;
+        let overallTotalBundles = 0;
         const lowStockItems = [];
         const outOfStockItems = [];
 
-        // Get current filter selections
+        // Ensure filter type dropdown is populated with allowed types
+        updateFilterDropdown(filterTypeSelect, kurtiTypes, 'Show All Types');
+
+        // Get current filter selections (after potentially updating dropdown)
         const selectedFilterType = filterTypeSelect.value;
         const selectedFilterSize = filterSizeSelect.value;
         const selectedFilterColor = filterColorSelect.value;
@@ -137,36 +143,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // --- Generate Stock Category Cards ---
         kurtiTypes.forEach(type => {
-            let typeTotal = 0;
+            let typeTotalBundles = 0;
             // Calculate total for the current Kurti Type
             if (stock[type]) {
                 for (const size in stock[type]) {
                     for (const color in stock[type][size]) {
-                        typeTotal += stock[type][size][color];
+                        typeTotalBundles += stock[type][size][color];
                     }
                 }
             }
-            overallTotalPieces += typeTotal; // Add to overall total
+            overallTotalBundles += typeTotalBundles; // Add to overall total
 
             // Create the card element
             const card = document.createElement('div');
             card.classList.add('stock-category-card');
             card.innerHTML = `
                 <h3>${type}</h3>
-                <p>Total Pieces:</p>
-                <span class="total-pieces">${typeTotal}</span>
+                <p>Total Bundles:</p>
+                <span class="total-pieces">${typeTotalBundles}</span>
                 <div class="mini-graph-container">
-                    <div class="mini-graph-fill" style="width: ${Math.min(100, typeTotal)}%;"></div>
+                    <div class="mini-graph-fill" style="width: ${Math.min(100, typeTotalBundles)}%;"></div>
                 </div>
                 <div class="mini-graph-label">Current Level</div>
             `;
-            // The mini-graph fill is a simple percentage based on the quantity itself.
-            // For a more advanced "comparison", you'd need a max capacity per type.
-
             stockSummaryGrid.appendChild(card);
         });
 
-        totalPiecesOverallSpan.textContent = overallTotalPieces;
+        totalPiecesOverallSpan.textContent = overallTotalBundles;
 
         // --- Populate Detailed Stock Table and Check for Low/Out of Stock ---
         // Also collect unique sizes and colors for filter dropdowns
@@ -193,7 +196,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 row.insertCell().textContent = type;
                                 row.insertCell().textContent = size;
                                 row.insertCell().textContent = color;
-                                row.insertCell().textContent = quantity;
+                                row.insertCell().textContent = quantity; // Now represents bundles
 
                                 const statusCell = row.insertCell();
                                 if (quantity === 0) {
@@ -203,7 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 } else if (quantity <= LOW_STOCK_THRESHOLD) {
                                     statusCell.textContent = 'Low Stock';
                                     statusCell.classList.add('status-low');
-                                    lowStockItems.push(`${type} (${size}, ${color}): ${quantity} pieces`);
+                                    lowStockItems.push(`${type} (${size}, ${color}): ${quantity} bundles`);
                                 } else {
                                     statusCell.textContent = 'In Stock';
                                     statusCell.classList.add('status-ok');
@@ -238,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (lowStockItems.length > 0) {
             alertContent += `
-                <p><strong>⚠️ Low Stock (below ${LOW_STOCK_THRESHOLD} pieces):</strong></p>
+                <p><strong>⚠️ Low Stock (below ${LOW_STOCK_THRESHOLD} bundles):</strong></p>
                 <ul>
                     ${lowStockItems.map(item => `<li class="low-stock">${item}</li>`).join('')}
                 </ul>
@@ -251,9 +254,6 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             stockAlertSection.style.display = 'none';
         }
-
-        // Charts are removed, so no updateCharts() call needed
-        // updateCharts();
     }
 
     // Helper to populate filter dropdowns generically
@@ -281,239 +281,128 @@ document.addEventListener('DOMContentLoaded', () => {
     filterColorSelect.addEventListener('change', updateHomePage);
 
 
-    // --- Chart.js Integration (Removed as charts are no longer displayed) ---
-    /*
-    function updateCharts() {
-        const transactionLog = getTransactionLog();
-        const addedData = transactionLog.added;
-        const removedData = transactionLog.removed;
-
-        // Aggregate data by date
-        const aggregatedAdded = {};
-        addedData.forEach(item => {
-            const date = new Date(item.timestamp).toLocaleDateString();
-            aggregatedAdded[date] = (aggregatedAdded[date] || 0) + item.pieces;
-        });
-
-        const aggregatedRemoved = {};
-        removedData.forEach(item => {
-            const date = new Date(item.timestamp).toLocaleDateString();
-            aggregatedRemoved[date] = (aggregatedRemoved[date] || 0) + item.pieces;
-        });
-
-        // Get all unique dates and sort them
-        const allDates = [...new Set([...Object.keys(aggregatedAdded), ...Object.keys(aggregatedRemoved)])].sort((a, b) => new Date(a) - new Date(b));
-
-        const chartAddedValues = allDates.map(date => aggregatedAdded[date] || 0);
-        const chartRemovedValues = allDates.map(date => aggregatedRemoved[date] || 0);
-
-        // Chart for Pieces Added
-        if (piecesAddedChartInstance) {
-            piecesAddedChartInstance.destroy();
+    // --- Generic Option Renderer (for Color and Size) ---
+    /**
+     * Renders an array of options as clickable boxes in a container.
+     * @param {HTMLElement} containerElement - The div where options will be rendered.
+     * @param {HTMLInputElement} hiddenInputElement - The hidden input to store the selected value.
+     * @param {Array<string>} optionsArray - An array of options to display.
+     * @param {string} [initialSelectedValue=''] - The value to initially select.
+     */
+    function renderOptionsAsBoxes(containerElement, hiddenInputElement, optionsArray, initialSelectedValue = '') {
+        containerElement.innerHTML = ''; // Clear existing options
+        if (optionsArray.length === 0) {
+            hiddenInputElement.value = ''; // Clear hidden input if no options
+            return;
         }
-        piecesAddedChartInstance = new Chart(document.getElementById('piecesAddedChart'), {
-            type: 'line',
-            data: {
-                labels: allDates,
-                datasets: [{
-                    label: 'Pieces Added',
-                    data: chartAddedValues,
-                    borderColor: 'rgba(0, 123, 255, 0.8)',
-                    backgroundColor: 'rgba(0, 123, 255, 0.2)',
-                    tension: 0.3,
-                    fill: true,
-                    pointRadius: 5,
-                    pointBackgroundColor: 'rgba(0, 123, 255, 1)',
-                    pointBorderColor: 'rgba(255, 255, 255, 0.7)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Pieces',
-                            color: varToRgb('--dark-gray')
-                        },
-                        ticks: {
-                            color: varToRgb('--dark-gray')
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Date',
-                            color: varToRgb('--dark-gray')
-                        },
-                        ticks: {
-                            color: varToRgb('--dark-gray')
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: varToRgb('--dark-gray')
-                        }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff'
-                    }
-                }
+
+        let selectedOptionDiv = null;
+
+        optionsArray.forEach((optionValue) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('kurti-type-option'); // Reuse same styling
+            optionDiv.textContent = optionValue;
+            optionDiv.dataset.value = optionValue; // Store the value in a data attribute
+
+            optionDiv.addEventListener('click', () => {
+                // Remove 'selected' class from all siblings
+                Array.from(containerElement.children).forEach(child => {
+                    child.classList.remove('selected');
+                });
+                // Add 'selected' class to the clicked option
+                optionDiv.classList.add('selected');
+                // Update the hidden input's value
+                hiddenInputElement.value = optionValue;
+            });
+
+            containerElement.appendChild(optionDiv);
+
+            if (optionValue === initialSelectedValue) {
+                selectedOptionDiv = optionDiv;
             }
         });
 
-        // Chart for Pieces Removed
-        if (piecesRemovedChartInstance) {
-            piecesRemovedChartInstance.destroy();
+        // Programmatically click the initial selected option if found, otherwise select the first one
+        if (selectedOptionDiv) {
+            selectedOptionDiv.click();
+        } else if (optionsArray.length > 0) {
+            containerElement.firstElementChild.click();
+        } else {
+            hiddenInputElement.value = ''; // Ensure hidden input is empty if no options
         }
-        piecesRemovedChartInstance = new Chart(document.getElementById('piecesRemovedChart'), {
-            type: 'line',
-            data: {
-                labels: allDates,
-                datasets: [{
-                    label: 'Pieces Removed',
-                    data: chartRemovedValues,
-                    borderColor: 'rgba(220, 53, 69, 0.8)',
-                    backgroundColor: 'rgba(220, 53, 69, 0.2)',
-                    tension: 0.3,
-                    fill: true,
-                    pointRadius: 5,
-                    pointBackgroundColor: 'rgba(220, 53, 69, 1)',
-                    pointBorderColor: 'rgba(255, 255, 255, 0.7)'
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Number of Pieces',
-                            color: varToRgb('--dark-gray')
-                        },
-                        ticks: {
-                            color: varToRgb('--dark-gray')
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Date',
-                            color: varToRgb('--dark-gray')
-                        },
-                        ticks: {
-                            color: varToRgb('--dark-gray')
-                        },
-                        grid: {
-                            color: 'rgba(0, 0, 0, 0.05)'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: true,
-                        labels: {
-                            color: varToRgb('--dark-gray')
-                        }
-                    },
-                    tooltip: {
-                        mode: 'index',
-                        intersect: false,
-                        backgroundColor: 'rgba(0, 0, 0, 0.7)',
-                        titleColor: '#fff',
-                        bodyColor: '#fff'
-                    }
-                }
-            }
-        });
-    }
-    */
-    /**
-     * Helper function to convert a CSS variable color to RGBA format for Chart.js.
-     * Kept as it might be used by other parts of the code for dynamic color handling
-     * (e.g., if you decide to add other visualizations later).
-     * @param {string} cssVar - The CSS variable name (e.g., '--primary-blue').
-     * @param {string} alpha - The alpha transparency value (0-1).
-     * @returns {string} The RGBA color string.
-     */
-    function varToRgb(cssVar, alpha = '1') {
-        const style = getComputedStyle(document.body);
-        let color = style.getPropertyValue(cssVar).trim();
-
-        // If it's a hex color, convert it to RGB first
-        if (color.startsWith('#')) {
-            const hex = color.slice(1);
-            const r = parseInt(hex.substring(0, 2), 16);
-            const g = parseInt(hex.substring(2, 4), 16);
-            const b = parseInt(hex.substring(4, 6), 16);
-            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-        }
-        // If it's already rgb(x, y, z), just add alpha
-        else if (color.startsWith('rgb(')) {
-            return `rgba(${color.substring(4, color.length - 1)}, ${alpha})`;
-        }
-        // Fallback for named colors or other formats (Chart.js can often handle them, but RGBA is safest)
-        return color;
     }
 
-
-    // --- Dynamic Color Dropdown (Add/Remove Forms) ---
+    // --- Dynamic Type, Color, and Size rendering for Forms ---
     /**
-     * Populates the color dropdown based on the selected Kurti Type.
-     * @param {HTMLSelectElement} typeSelect - The Kurti Type select element.
-     * @param {HTMLSelectElement} colorSelect - The Color select element to update.
+     * Renders the color options as boxes based on the selected Kurti Type.
+     * @param {HTMLInputElement} typeHiddenInput - The hidden input element that holds the selected Kurti Type.
+     * @param {HTMLElement} colorOptionsContainer - The div where color options will be rendered.
+     * @param {HTMLInputElement} colorHiddenInput - The hidden input to store the selected color.
      */
-    function updateFormColorDropdown(typeSelect, colorSelect) {
-        const selectedType = typeSelect.value;
+    function renderFormColorOptions(typeHiddenInput, colorOptionsContainer, colorHiddenInput) {
+        const selectedType = typeHiddenInput.value;
         const colors = kurtiColors[selectedType] || [];
-
-        colorSelect.innerHTML = '<option value="">Select Color</option>'; // Reset dropdown
-        colors.forEach(color => {
-            const option = document.createElement('option');
-            option.value = color;
-            option.textContent = color;
-            colorSelect.appendChild(option);
-        });
-        colorSelect.disabled = colors.length === 0; // Disable if no colors available
+        renderOptionsAsBoxes(colorOptionsContainer, colorHiddenInput, colors, ''); // Render colors, no initial pre-selection needed here
     }
 
-    // Attach event listeners for dynamic color dropdown updates for forms
-    addTypeSelect.addEventListener('change', () => updateFormColorDropdown(addTypeSelect, addColorSelect));
-    removeTypeSelect.addEventListener('change', () => updateFormColorDropdown(removeTypeSelect, removeColorSelect));
+    /**
+     * Renders clickable Kurti Type options in a given container, and triggers rendering of colors and sizes.
+     * @param {HTMLElement} typeOptionsContainer - The div where type options will be rendered.
+     * @param {HTMLInputElement} typeHiddenInput - The hidden input to store the selected type.
+     * @param {HTMLElement} colorOptionsContainer - The div where color options will be rendered.
+     * @param {HTMLInputElement} colorHiddenInput - The hidden input to store the selected color.
+     * @param {HTMLElement} sizeOptionsContainer - The div where size options will be rendered.
+     * @param {HTMLInputElement} sizeHiddenInput - The hidden input to store the selected size.
+     * @param {Array<string>} types - An array of kurti types to display.
+     * @param {Object} colorsMap - Map of kurti types to their colors.
+     * @param {Array<string>} sizesArray - An array of sizes to display.
+     */
+    function renderKurtiTypeOptions(typeOptionsContainer, typeHiddenInput,
+                                  colorOptionsContainer, colorHiddenInput,
+                                  sizeOptionsContainer, sizeHiddenInput,
+                                  types, colorsMap, sizesArray) {
+        typeOptionsContainer.innerHTML = ''; // Clear existing options
+        types.forEach((type, index) => {
+            const optionDiv = document.createElement('div');
+            optionDiv.classList.add('kurti-type-option');
+            optionDiv.textContent = type;
+            optionDiv.dataset.type = type;
+
+            optionDiv.addEventListener('click', () => {
+                Array.from(typeOptionsContainer.children).forEach(child => {
+                    child.classList.remove('selected');
+                });
+                optionDiv.classList.add('selected');
+                typeHiddenInput.value = type;
+
+                // Render colors based on selected type
+                renderFormColorOptions(typeHiddenInput, colorOptionsContainer, colorHiddenInput);
+                // Render sizes (always the same set, but ensure it's rendered and first one selected)
+                renderOptionsAsBoxes(sizeOptionsContainer, sizeHiddenInput, sizesArray, '');
+            });
+
+            typeOptionsContainer.appendChild(optionDiv);
+
+            // Automatically select the first option when rendering the type options initially
+            if (index === 0) {
+                optionDiv.click();
+            }
+        });
+    }
 
     // --- Add Cutting Logic ---
     addCuttingForm.addEventListener('submit', (e) => {
         e.preventDefault(); // Prevent default form submission
 
-        // Get form values
-        const type = addTypeSelect.value;
-        const size = document.getElementById('add-size').value;
-        const color = addColorSelect.value;
-        const pieces = parseInt(addPiecesInput.value, 10);
+        // Get form values from hidden inputs
+        const type = addTypeInput.value;
+        const color = addColorInput.value;
+        const size = addSizesInput.value;
+        const bundles = parseInt(addBundlesInput.value, 10);
 
         // Basic validation
-        if (!type || !size || !color || isNaN(pieces) || pieces <= 0) {
-            alert('Please fill in all fields correctly and ensure "Total Number of Pieces" is a positive number.');
+        if (!type || !size || !color || isNaN(bundles) || bundles <= 0) {
+            alert('Please select a Type, Color, Size, and enter a positive number for Bundles.');
             return;
         }
 
@@ -521,22 +410,18 @@ document.addEventListener('DOMContentLoaded', () => {
         // Initialize nested objects if they don't exist
         if (!stock[type]) stock[type] = {};
         if (!stock[type][size]) stock[type][size] = {};
-        // Add pieces to existing quantity or set new quantity
-        stock[type][size][color] = (stock[type][size][color] || 0) + pieces;
+        // Add bundles to existing quantity or set new quantity
+        stock[type][size][color] = (stock[type][size][color] || 0) + bundles;
 
         setStockData(stock); // Save updated stock
 
-        // Update transaction log for 'added' items (even if charts are removed, log might be useful for future features)
-        const transactionLog = getTransactionLog();
-        transactionLog.added.push({
-            type, size, color, pieces,
-            timestamp: new Date().toISOString() // Store timestamp for charting
-        });
-        setTransactionLog(transactionLog);
-
-        alert(`${pieces} pieces of ${color} ${type} (${size}) added to stock successfully.`);
+        alert(`${bundles} bundles of ${color} ${type} (${size}) added to stock successfully.`);
         addCuttingForm.reset(); // Reset form fields
-        updateFormColorDropdown(addTypeSelect, addColorSelect); // Reset color dropdown after type reset
+        // After reset, re-render and re-select the first type, which cascades to color and size
+        renderKurtiTypeOptions(addTypeOptionsContainer, addTypeInput,
+                            addColorOptionsContainer, addColorInput,
+                            addSizesOptionsContainer, addSizesInput,
+                            kurtiTypes, kurtiColors, kurtiSizes);
         updateHomePage(); // Refresh home page dashboard
     });
 
@@ -544,15 +429,15 @@ document.addEventListener('DOMContentLoaded', () => {
     removeCuttingForm.addEventListener('submit', (e) => {
         e.preventDefault(); // Prevent default form submission
 
-        // Get form values
-        const type = removeTypeSelect.value;
-        const size = document.getElementById('remove-size').value;
-        const color = removeColorSelect.value;
-        const piecesToRemove = parseInt(removePiecesInput.value, 10);
+        // Get form values from hidden inputs
+        const type = removeTypeInput.value;
+        const color = removeColorInput.value;
+        const size = removeSizesInput.value;
+        const bundlesToRemove = parseInt(removeBundlesInput.value, 10);
 
         // Basic validation
-        if (!type || !size || !color || isNaN(piecesToRemove) || piecesToRemove <= 0) {
-            alert('Please fill in all fields correctly and ensure "Pieces to Remove" is a positive number.');
+        if (!type || !size || !color || isNaN(bundlesToRemove) || bundlesToRemove <= 0) {
+            alert('Please select a Type, Color, Size, and enter a positive number for Bundles to Remove.');
             return;
         }
 
@@ -561,16 +446,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentQuantity = (stock[type] && stock[type][size] && stock[type][size][color]) || 0;
 
         // Check if sufficient stock is available for removal
-        if (piecesToRemove > currentQuantity) {
-            alert(`Error: Not enough stock. Only ${currentQuantity} pieces of ${color} ${type} (${size}) are available.`);
+        if (bundlesToRemove > currentQuantity) {
+            alert(`Error: Not enough stock. Only ${currentQuantity} bundles of ${color} ${type} (${size}) are available.`);
             return;
         }
 
         // Update stock quantity
-        stock[type][size][color] -= piecesToRemove;
+        stock[type][size][color] -= bundlesToRemove;
 
         // Clean up stock data if quantity becomes zero or less
-        if (stock[type][size][color] <= 0) { // Use <= 0 to handle potential negative from error
+        if (stock[type][size][color] <= 0) {
             delete stock[type][size][color]; // Remove the color entry
             if (Object.keys(stock[type][size]).length === 0) {
                 delete stock[type][size]; // Remove size entry if no colors left
@@ -582,20 +467,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         setStockData(stock); // Save updated stock
 
-        // Update transaction log for 'removed' items
-        const transactionLog = getTransactionLog();
-        transactionLog.removed.push({
-            type, size, color, pieces: piecesToRemove,
-            timestamp: new Date().toISOString()
-        });
-        setTransactionLog(transactionLog);
-
-        alert(`${piecesToRemove} pieces of ${color} ${type} (${size}) removed from stock successfully.`);
+        alert(`${bundlesToRemove} bundles of ${color} ${type} (${size}) removed from stock successfully.`);
         removeCuttingForm.reset(); // Reset form fields
-        updateFormColorDropdown(removeTypeSelect, removeColorSelect); // Reset color dropdown
+        // After reset, re-render and re-select the first type, which cascades to color and size
+        renderKurtiTypeOptions(removeTypeOptionsContainer, removeTypeInput,
+                            removeColorOptionsContainer, removeColorInput,
+                            removeSizesOptionsContainer, removeSizesInput,
+                            kurtiTypes, kurtiColors, kurtiSizes);
         updateHomePage(); // Refresh home page dashboard
     });
-
 
     // --- Initialize Application ---
     showPage('home-page'); // Start on the home page when the app loads
