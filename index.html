@@ -11,13 +11,14 @@
 <body>
     <header>
         <div class="header-content">
-            <img src="logo.png" alt="Uthkrishtam Fashion Logo" class="logo">
+            <img src="https://placehold.co/70x70/007bff/ffffff?text=Logo" alt="Uthkrishtam Fashion Logo" class="logo">
             <h1>Uthkrishtam Fashion - Cutting Stock Manager</h1>
         </div>
         <nav>
             <button class="nav-button" data-page="home">Home</button>
             <button class="nav-button" data-page="add-cutting">Add Cutting</button>
             <button class="nav-button" data-page="remove-cutting">Remove Cutting</button>
+            <!-- Removed Modify Stock Button -->
         </nav>
     </header>
 
@@ -30,14 +31,12 @@
             </div>
 
             <div class="summary-total-pieces">
-                Total Pieces Across All Categories: <span id="total-pieces-overall">0</span>
+                Total Bundles Across All Categories: <span id="total-pieces-overall">0</span>
             </div>
 
             <div class="stock-alert-section" id="stock-alert-section">
                 <!-- Low/Out of stock alerts will be displayed here -->
             </div>
-
-            <!-- Chart Section Removed -->
 
             <div class="stock-table-container">
                 <h2>Detailed Stock View</h2>
@@ -48,8 +47,6 @@
                             <option value="all">Show All Types</option>
                             <option value="AppleCut">AppleCut</option>
                             <option value="AK Cotton">AK Cotton</option>
-                            <option value="Print">Print</option>
-                            <option value="Sleevless">Sleevless</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -76,7 +73,7 @@
                             <th>Type</th>
                             <th>Size</th>
                             <th>Color</th>
-                            <th>Quantity</th>
+                            <th>Bundles</th>
                             <th>Status</th>
                         </tr>
                     </thead>
@@ -92,34 +89,28 @@
             <h2>Add New Cutting Stock</h2>
             <form id="add-cutting-form">
                 <div class="form-group">
-                    <label for="add-type">Type of Kurti Cutting:</label>
-                    <select id="add-type" required>
-                        <option value="">Select Type</option>
-                        <option value="AppleCut">AppleCut</option>
-                        <option value="AK Cotton">AK Cotton</option>
-                        <option value="Print">Print</option>
-                        <option value="Sleevless">Sleevless</option>
-                    </select>
+                    <label>Type of Kurti Cutting:</label>
+                    <div id="add-type-options" class="kurti-type-options-container">
+                        <!-- Options will be dynamically added here by JS -->
+                    </div>
+                    <input type="hidden" id="add-type" name="add-type" required>
                 </div>
                 <div class="form-group">
-                    <label for="add-size">Size:</label>
-                    <select id="add-size" required>
-                        <option value="">Select Size</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
-                    </select>
+                    <label>Color:</label>
+                    <div id="add-color-options" class="kurti-type-options-container">
+                        <!-- Options will be dynamically added here by JS -->
+                    </div>
+                    <input type="hidden" id="add-color-input" name="add-color" required>
                 </div>
                 <div class="form-group">
-                    <label for="add-color">Color:</label>
-                    <select id="add-color" required>
-                        <option value="">Select Color</option>
-                    </select>
+                    <label>Size:</label>
+                    <div id="add-size-options" class="kurti-type-options-container">
+                        <!-- Options will be dynamically added here by JS -->
+                    </div>
+                    <input type="hidden" id="add-size-input" name="add-size" required>
                 </div>
                 <div class="form-group">
-                    <label for="add-pieces">Total Number of Pieces:</label>
+                    <label for="add-pieces">Total Number of Bundles:</label>
                     <input type="number" id="add-pieces" min="1" required>
                 </div>
                 <button type="submit">Add Stock</button>
@@ -128,42 +119,38 @@
 
         <!-- Remove Cutting Page -->
         <section id="remove-cutting-page" class="page">
-            <h2>Remove Cutting Stock (Given to Labour)</h2>
+            <h2>Remove Cutting Stock</h2>
             <form id="remove-cutting-form">
                 <div class="form-group">
-                    <label for="remove-type">Type of Kurti Cutting:</label>
-                    <select id="remove-type" required>
-                        <option value="">Select Type</option>
-                        <option value="AppleCut">AppleCut</option>
-                        <option value="AK Cotton">AK Cotton</option>
-                        <option value="Print">Print</option>
-                        <option value="Sleevless">Sleevless</option>
-                    </select>
+                    <label>Type of Kurti Cutting:</label>
+                    <div id="remove-type-options" class="kurti-type-options-container">
+                        <!-- Options will be dynamically added here by JS -->
+                    </div>
+                    <input type="hidden" id="remove-type" name="remove-type" required>
                 </div>
                 <div class="form-group">
-                    <label for="remove-size">Size:</label>
-                    <select id="remove-size" required>
-                        <option value="">Select Size</option>
-                        <option value="S">S</option>
-                        <option value="M">M</option>
-                        <option value="L">L</option>
-                        <option value="XL">XL</option>
-                        <option value="XXL">XXL</option>
-                    </select>
+                    <label>Color:</label>
+                    <div id="remove-color-options" class="kurti-type-options-container">
+                        <!-- Options will be dynamically added here by JS -->
+                    </div>
+                    <input type="hidden" id="remove-color-input" name="remove-color" required>
                 </div>
                 <div class="form-group">
-                    <label for="remove-color">Color:</label>
-                    <select id="remove-color" required>
-                        <option value="">Select Color</option>
-                    </select>
+                    <label>Size:</label>
+                    <div id="remove-size-options" class="kurti-type-options-container">
+                        <!-- Options will be dynamically added here by JS -->
+                    </div>
+                    <input type="hidden" id="remove-size-input" name="remove-size" required>
                 </div>
                 <div class="form-group">
-                    <label for="remove-pieces">Pieces to Remove:</label>
+                    <label for="remove-pieces">Bundles to Remove:</label>
                     <input type="number" id="remove-pieces" min="1" required>
                 </div>
                 <button type="submit">Remove Stock</button>
             </form>
         </section>
+
+        <!-- Removed Modify Stock Page -->
     </main>
 
     <footer>
